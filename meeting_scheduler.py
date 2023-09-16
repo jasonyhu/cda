@@ -12,6 +12,7 @@
 # Change the below filepath to the name of the csv file. 
 # If it doesn't work, rename the document using only letters (no spaces, no punctuation) and retry.
 FILE = "NeedToMeet – Autumn Quarter CDA+ Meeting.csv"
+MAX_NUM_LEFT_OUT = 2
 
 import pandas
 
@@ -19,7 +20,7 @@ timetable = pandas.read_csv(filepath_or_buffer=FILE, header=[0,1,2], keep_defaul
 timetable = timetable.drop(index=0).reset_index(drop=True)
 
 times_that_work = []
-one_left_out = []
+some_left_out = []
 
 def get_unavailable(col, attendees):
     return [attendee for attendee in attendees if not timetable.iat[attendee, col]]
@@ -28,8 +29,8 @@ def rec_find_meetings(meetings, meetings_left, attendees):
     if not attendees: 
         times_that_work.append(meetings)
     if meetings_left == 0:
-        if len(attendees) == 1:
-            one_left_out.append(meetings)
+        if attendees and len(attendees) <= MAX_NUM_LEFT_OUT:
+            some_left_out.append(meetings)
         return
     for i in range(meetings[-1] + 1, len(timetable.columns)):
         rec_find_meetings(meetings + [i], meetings_left - 1, get_unavailable(i, attendees))
@@ -67,3 +68,5 @@ def print_times(all_times):
     print()
 
 print_times(times_that_work)
+
+print(some_left_out)
